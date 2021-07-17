@@ -38,3 +38,22 @@ class RightmoveHelper:
         locations = data["typeAheadLocations"]
 
         return locations
+
+    def get_property_pages(self, search_url):
+        """
+        Extracts all the property page URLs for a given Rightmove search page.
+
+        Parameters:
+            search_url (str):The string representing the Rightmove search URL showing all the rental listings.
+
+        Returns:
+            prop_pages (list):A list where each element corresponds to a property page from the search page.
+        """
+        # use scrapy, filter by xpath, do what ever is needed to get all the links. the index changes page in multiples of 24
+
+        # https://www.rightmove.co.uk/sitemap.xml this sitemap lists all links for all the post codes
+        #LIST_ITEM_SELECTOR = "div[id*='property'].l-searchResult"
+#        HEADLINE_SELECTOR = "//div/div/div[4]/div[1]/div[2]/a/address/text()"
+ #       RENT_SELECTOR = "//div/div/div[3]/div/a/div"
+  #      print(response.text)
+

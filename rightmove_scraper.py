@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 
+"""
+WARNING: OBSOLETE CODE!
+"""
+
 import scrapy
 
 class RMFindPropertySpider(scrapy.Spider):

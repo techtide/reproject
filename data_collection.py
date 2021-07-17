@@ -17,6 +17,8 @@ class Property:
     :type fp_url: str
     :param gallery: A list containing the URLs to all of the gallery images.
     :type gallery: list
+    :param listing: A permanent URL of the Rightmove listing.
+    :type listing: str
     """
     def __init__(self, headline, lonlat, descr, rent, rooms, fp_url, gallery):
         self.headline = headline

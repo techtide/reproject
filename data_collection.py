@@ -31,6 +31,6 @@ class Property:
         '''Returns the human-readable location headline of the property.'''
         return self.headline 
 
-    def download_images(self):
+    def download(self):
         '''Downloads and archives the images to an archive/database.'''
-        raise RuntimeError("The function to download and archive all images to a database hhas not been implemented.")
+        raise RuntimeError("The function to download and archive all images to a database has not been implemented.")

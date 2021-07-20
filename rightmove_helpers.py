@@ -58,23 +58,28 @@ class RightmoveHelper:
         doc = lxml.html.fromstring(html.content)
 
         NUM_SCRAPED = 0
-        TOTAL_RESULTS = doc.xpath("//div[@id='searchHeader']/span/text()")[0]
-        RESULTS_LEFT = int(TOTAL_RESULTS.replace(",", "")) - NUM_SCRAPED
+        TOTAL_RESULTS = int(doc.xpath("//div[@id='searchHeader']/span/text()")[0].replace(",", ""))
+        print(TOTAL_RESULTS, "properties to scrape...")
 
-        while RESULTS_LEFT > 0:
+        prev_idcol_count = 1    # The number of IDs collected in the previous iteration.
+
+        # TODO: This solution is not very elegant. Refactor later whenever I have energy. View previous Git commits.
+        # TODO: This solution does not scrape all the properties. Needs to be fixed.
+        while prev_idcol_count > 0:
             html = requests.get(SEARCH_URL)
             doc = lxml.html.fromstring(html.content)
             sel = CSSSelector(".propertyCard-anchor")
             ids = [e.get("id")[4:] for e in sel(doc)]   # Slice starting from index 4 onwards to avoid the "prop" prefix.
+            prev_idcol_count = len(ids)
+            
+            RM_PROPIDS += ids
 
-            print(NUM_SCRAPED, RESULTS_LEFT)
-
-            RM_PROPIDS = RM_PROPIDS + ids
-            NUM_SCRAPED = NUM_SCRAPED + len(ids) - 1
-            RESULTS_LEFT = int(TOTAL_RESULTS.replace(",", "")) - NUM_SCRAPED 
-            SEARCHURL = base_search_url + "&index=" + str(NUM_SCRAPED)
-        print("------------Scraping of search results complete. PogChamp!--------------")
-
+            print(NUM_SCRAPED)
+            NUM_SCRAPED += len(ids) - 1
+            SEARCH_URL = base_search_url + "&index=" + str(NUM_SCRAPED)
+        
         assert len(RM_PROPIDS) > 0
+
+        print(len(RM_PROPIDS), "properties successfully scraped. Poggers!")
 
         return list(set(RM_PROPIDS))    # Shorthand to quickly remove duplicate RM property IDs from the list.

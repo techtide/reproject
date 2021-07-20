@@ -53,6 +53,17 @@ class RightmoveHelper:
         Returns:
         prop (Property):An object of type Property containing the property details.
         """
+        assert type(rm_property_id
+        RM_URL = "https://wwww.rightmove.co.uk/properties/" + str(rm_property_id) + "#/"
+        
+        html = requests.get(RM_URL)
+        doc = lxml.html.fromstring(html.content)
+
+        DISPLAYADDRESS_XPATH = "//h1[@itemprop='streetAddress']"
+        PRICE_XPATH = "//html/body/div[2]/div/div[3]/main/div[2]/div/div/div[1]/spanz"
+        PROPERTYTYPE_XPATH = "//div[@data-test='infoReel']/div[1]/div[2]" 
+        BEDROOMS_XPATH = "//div[@data-test='infoReel']/div[2]/div[2]"
+        BATHROOMS_XPATH = "//div[@data-test='infoReel']/div[3]/div[2]"
 
     def get_property_ids(self, base_search_url):
         """
@@ -64,6 +75,8 @@ class RightmoveHelper:
         Returns:
             prop_id (list):A list where each element corresponds to a property page ID from the search page.
         """
+        assert type(base_search_url) == str
+
         RM_PROPIDS = []
         SEARCH_URL = base_search_url
 

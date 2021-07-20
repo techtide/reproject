@@ -51,16 +51,30 @@ class RightmoveHelper:
         Returns:
             prop_id (list):A list where each element corresponds to a property page ID from the search page.
         """
-        NUM_SCRAPED = 1
         RM_PROPIDS = []
         SEARCH_URL = base_search_url
-        for pg in range(NUM_PAGES):
+
+        html = requests.get(SEARCH_URL)
+        doc = lxml.html.fromstring(html.content)
+
+        NUM_SCRAPED = 0
+        TOTAL_RESULTS = doc.xpath("//div[@id='searchHeader']/span/text()")[0]
+        RESULTS_LEFT = int(TOTAL_RESULTS.replace(",", "")) - NUM_SCRAPED
+
+        while RESULTS_LEFT > 0:
             html = requests.get(SEARCH_URL)
             doc = lxml.html.fromstring(html.content)
             sel = CSSSelector(".propertyCard-anchor")
-            ids = [e.get("id")[4:] for e in sel(doc)]   # Slice starting from index 4 onwards to avoid the "prop," prefix.
+            ids = [e.get("id")[4:] for e in sel(doc)]   # Slice starting from index 4 onwards to avoid the "prop" prefix.
+
+            print(NUM_SCRAPED, RESULTS_LEFT)
+
             RM_PROPIDS = RM_PROPIDS + ids
-            NUM_SCRAPED = NUM_SCRAPED + 1
+            NUM_SCRAPED = NUM_SCRAPED + len(ids) - 1
+            RESULTS_LEFT = int(TOTAL_RESULTS.replace(",", "")) - NUM_SCRAPED 
             SEARCHURL = base_search_url + "&index=" + str(NUM_SCRAPED)
-        assert RM_PROPIDS > 0
-        return RM_PROPIDS
+        print("------------Scraping of search results complete. PogChamp!--------------")
+
+        assert len(RM_PROPIDS) > 0
+
+        return list(set(RM_PROPIDS))    # Shorthand to quickly remove duplicate RM property IDs from the list.

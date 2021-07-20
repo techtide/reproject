@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
 import requests
+import lxml.html
+from lxml.cssselect import CSSSelector
 
 class RightmoveHelper:
     """
@@ -39,16 +41,25 @@ class RightmoveHelper:
 
         return locations
 
-    def get_property_pages(self, search_url):
+    def get_property_ids(self, base_search_url):
         """
-        Extracts all the property page URLs for a given Rightmove search page.
+        Extracts all the property page ids (https://rightmove.co.uk/property/<ID>) for a given Rightmove search page.
 
         Parameters:
-            search_url (str):The string representing the Rightmove search URL showing all the rental listings.
+        base_search_url (str):The string representing the Rightmove search URL showing all the rental listings. Note that this should be a URL without the "index" in the URL. This means that the &index=<value> parameter should not be in the URL, but the location identifier (RMID) should be in the URL along with other parameters like property types, keywords, and furnish types. 
 
         Returns:
-            prop_pages (list):A list where each element corresponds to a property page from the search page.
+            prop_id (list):A list where each element corresponds to a property page ID from the search page.
         """
+        NUM_PAGES = 1
+        RM_PROPIDS = []
+        SEARCH_URL = base_search_url
+        for pg in range(NUM_PAGES):
+            html = requests.get(SEARCH_URL)
+            doc = lxml.html.fromstring(html.content)
+            sel = CSSSelector(".propertyCard-anchor")
+            ids = [e.get("id") for e in sel(h)]
+         
         # use scrapy, filter by xpath, do what ever is needed to get all the links. the index changes page in multiples of 24
 
         # https://www.rightmove.co.uk/sitemap.xml this sitemap lists all links for all the post codes
@@ -56,4 +67,3 @@ class RightmoveHelper:
 #        HEADLINE_SELECTOR = "//div/div/div[4]/div[1]/div[2]/a/address/text()"
  #       RENT_SELECTOR = "//div/div/div[3]/div/a/div"
   #      print(response.text)
-

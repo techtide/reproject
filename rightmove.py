@@ -3,6 +3,8 @@
 import requests
 import lxml.html
 from lxml.cssselect import CSSSelector
+import pandas as pd
+from property import Property
 
 class RightmoveHelper:
     """
@@ -40,6 +42,17 @@ class RightmoveHelper:
         locations = data["typeAheadLocations"]
 
         return locations
+
+    def scrape_property(self, rm_property_id):
+        """
+        Scrapes all details of a property page and returns a Property object.
+
+        Parameters:
+        rm_property_id (str):The string representing the Rightmove property ID, retrieved, for example, from the get_property_ids function.
+
+        Returns:
+        prop (Property):An object of type Property containing the property details.
+        """
 
     def get_property_ids(self, base_search_url):
         """

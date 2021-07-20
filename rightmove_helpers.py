@@ -51,19 +51,16 @@ class RightmoveHelper:
         Returns:
             prop_id (list):A list where each element corresponds to a property page ID from the search page.
         """
-        NUM_PAGES = 1
+        NUM_SCRAPED = 1
         RM_PROPIDS = []
         SEARCH_URL = base_search_url
         for pg in range(NUM_PAGES):
             html = requests.get(SEARCH_URL)
             doc = lxml.html.fromstring(html.content)
             sel = CSSSelector(".propertyCard-anchor")
-            ids = [e.get("id") for e in sel(h)]
-         
-        # use scrapy, filter by xpath, do what ever is needed to get all the links. the index changes page in multiples of 24
-
-        # https://www.rightmove.co.uk/sitemap.xml this sitemap lists all links for all the post codes
-        #LIST_ITEM_SELECTOR = "div[id*='property'].l-searchResult"
-#        HEADLINE_SELECTOR = "//div/div/div[4]/div[1]/div[2]/a/address/text()"
- #       RENT_SELECTOR = "//div/div/div[3]/div/a/div"
-  #      print(response.text)
+            ids = [e.get("id")[4:] for e in sel(doc)]   # Slice starting from index 4 onwards to avoid the "prop," prefix.
+            RM_PROPIDS = RM_PROPIDS + ids
+            NUM_SCRAPED = NUM_SCRAPED + 1
+            SEARCHURL = base_search_url + "&index=" + str(NUM_SCRAPED)
+        assert RM_PROPIDS > 0
+        return RM_PROPIDS

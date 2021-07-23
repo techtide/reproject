@@ -10,7 +10,6 @@ class RightmoveHelper:
     """
     Helper tools for scraping the Rightmove property website.
     """
-    BASE_RMID_ENDPOINT = "https://www.rightmove.co.uk/typeAhead/uknostreet/"
 
     def __init__(self):
         pass
@@ -25,17 +24,19 @@ class RightmoveHelper:
         Returns:
             rmid (str):The proprietary Rightmove location ID, a string comprised of integers and special characters.
         """
-        req_url = self.BASE_RMID_ENDPOINT
+        REQ_URL = "https://www.rightmove.co.uk/typeAhead/uknostreet/"
         iterator = 0
+        loc = loc.upper()
         for char in loc:
             if iterator == 2:
-                req_url += "/"
+                REQ_URL += "/"
                 iterator = 0
 
-            req_url += char
+            REQ_URL += char
             iterator += 1
 
-        res = requests.get(req_url)
+        res = requests.get(REQ_URL)
+        print("Requesting the following endpoint:", REQ_URL)
         assert res.status_code == 200, "The request to the Rightmove RMID endpoint was unsuccessful."
 
         data = res.json()
@@ -53,7 +54,7 @@ class RightmoveHelper:
         Returns:
         prop (Property):An object of type Property containing the property details.
         """
-        assert type(rm_property_id
+        assert type(rm_property_id)
         RM_URL = "https://wwww.rightmove.co.uk/properties/" + str(rm_property_id) + "#/"
         
         html = requests.get(RM_URL)
@@ -64,6 +65,8 @@ class RightmoveHelper:
         PROPERTYTYPE_XPATH = "//div[@data-test='infoReel']/div[1]/div[2]" 
         BEDROOMS_XPATH = "//div[@data-test='infoReel']/div[2]/div[2]"
         BATHROOMS_XPATH = "//div[@data-test='infoReel']/div[3]/div[2]"
+
+        DISPLAYADDRESS = str(doc.xpath(DISPLAYADDRESS_XPATH)[0])
 
     def get_property_ids(self, base_search_url):
         """

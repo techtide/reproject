@@ -61,12 +61,33 @@ class RightmoveHelper:
         doc = lxml.html.fromstring(html.content)
 
         DISPLAYADDRESS_XPATH = "//h1[@itemprop='streetAddress']"
-        PRICE_XPATH = "//html/body/div[2]/div/div[3]/main/div[2]/div/div/div[1]/spanz"
+        PRICE_XPATH = "//html/body/div[2]/div/div[3]/main/div[2]/div/div/div/span"
         PROPERTYTYPE_XPATH = "//div[@data-test='infoReel']/div[1]/div[2]" 
         BEDROOMS_XPATH = "//div[@data-test='infoReel']/div[2]/div[2]"
         BATHROOMS_XPATH = "//div[@data-test='infoReel']/div[3]/div[2]"
+        PROPERTYDESCRIPTION_XPATH = "//html/body/div[2]/div/div[3]/main/div[10]/div/div"
 
+        PRICEAMOUNT = str(doc.xpath(PRICE_XPATH)[0]))
         DISPLAYADDRESS = str(doc.xpath(DISPLAYADDRESS_XPATH)[0])
+        PROPERTYTYPE = str(doc.xpath(PROPERTYTYPE_XPATH)[0])
+        BEDROOMS = str(doc.xpath(BEDROOMS_XPATH)[0])
+        PROEPRTYDESCRIPTION = str(doc.xpath(PROPERTYDESCRIPTION_XPATH)[0])
+
+        BATHROOMS = str(doc.xpath(BATHROOMS_XPATH)[0])
+
+    def gen_property_urls(self, rmids):
+        """
+        Returns a generator function which provides an output sequence of property rental URLs.
+        
+        Parameters:
+        rmids (list):The array representning all the RMIDs which neeed to be scraped into accessible rental URLs.
+
+        Returns:
+        links (list):The generated array containing the rental URLs.
+        """
+        BASE_URL = "https://www.rightmove.co.uk/property-to-rent/find.html?searchType=RENT&locationIdentifier="
+        for rmid in rmids:
+            yield BASE_URL + str(rmid)
 
     def get_property_ids(self, base_search_url):
         """
@@ -76,7 +97,7 @@ class RightmoveHelper:
         base_search_url (str):The string representing the Rightmove search URL showing all the rental listings. Note that this should be a URL without the "index" in the URL. This means that the &index=<value> parameter should not be in the URL, but the location identifier (RMID) should be in the URL along with other parameters like property types, keywords, and furnish types. 
 
         Returns:
-            prop_id (list):A list where each element corresponds to a property page ID from the search page.
+        prop_id (list):A list where each element corresponds to a property page ID from the search page.
         """
         assert type(base_search_url) == str
 

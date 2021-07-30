@@ -93,19 +93,7 @@ class RightmoveHelper:
                 fp_src = str(d.xpath(FLOORPLAN_IMAGE_XPATH)[0])
                 fp_urls.append(fp_src)
 
-        NUM_IMAGES_XPATH = "//html/body/div[2]/div/div[3]/main/div[8]/div[2]/a[7]"
-        NUMIMGS = int(str(doc.xpath(NUM_IMAGES_XPATH)[0]).replace("+",""))
-        
-        img_urls = []
-
-        if NUMIMGS > 0:
-            for nimg in range(NUMIMGS):
-                d = lxml.html.fromstring(requests.get("https://www.rightmove.co.uk/properties/" + str(rm_property_id) + "#/media?id=media" + str(nimg)))
-                IMG_XPATH = "//html/body/div[2]/div/div[2]/div[2]/div/div/div[4]/div/div/img/@src"
-                img_src = str(d.xpath(IMG_XPATH)[0])
-                img_urls.append(img_src)
-
-        return Property(headline=DISPLAYADDRESS, lonlat=(LONGITUDE, LATITUDE), descr=PROPERTYDESCRIPTION, rent=PRICEAMOUNT, rooms=(BEDROOMS, BATHROOMS), fp_url=fp_urls, gallery=img_urls)
+        return Property(headline=DISPLAYADDRESS, lonlat=(LONGITUDE, LATITUDE), descr=PROPERTYDESCRIPTION, rent=PRICEAMOUNT, rooms=(BEDROOMS, BATHROOMS), fp_url=fp_urls, gallery=)
         
     def gen_property_urls(self, rmids):
         """

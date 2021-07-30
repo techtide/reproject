@@ -3,6 +3,7 @@
 import requests
 import lxml.html
 from lxml.cssselect import CSSSelector
+import re
 import pandas as pd
 from property import Property
 
@@ -66,15 +67,34 @@ class RightmoveHelper:
         BEDROOMS_XPATH = "//div[@data-test='infoReel']/div[2]/div[2]"
         BATHROOMS_XPATH = "//div[@data-test='infoReel']/div[3]/div[2]"
         PROPERTYDESCRIPTION_XPATH = "//html/body/div[2]/div/div[3]/main/div[10]/div/div"
+        MAPIMGSRC_XPATH =  "//html/body/div[2]/div/div[3]/main/div[16]/div/a/img/@src"
+        LATITUDE_REGEX = re.compile(r"(latitude=)(.*)&l")
+        LONGITUDE_REGEX = re.compile(r"(longitude=)(.*)&" )
+        NUM_FLOORPLANS_XPATH= "//html/body/div[2]/div/div[3]/main/div[8]/div[1]/a/span"
 
-        PRICEAMOUNT = str(doc.xpath(PRICE_XPATH)[0]))
+        PRICEAMOUNT = str(doc.xpath(PRICE_XPATH)[0])
         DISPLAYADDRESS = str(doc.xpath(DISPLAYADDRESS_XPATH)[0])
         PROPERTYTYPE = str(doc.xpath(PROPERTYTYPE_XPATH)[0])
         BEDROOMS = str(doc.xpath(BEDROOMS_XPATH)[0])
         PROEPRTYDESCRIPTION = str(doc.xpath(PROPERTYDESCRIPTION_XPATH)[0])
-
         BATHROOMS = str(doc.xpath(BATHROOMS_XPATH)[0])
+        MAPIMGSRC = str(doc.xpath(IMGSRC_XPATH)[0])
+        LONGITUDE = int(LONGITUDE_REGEX.match(MAPIMGSRC)[2])
+        LATITUDE = int(LATITUDE_REGEX.match(MAPIMGSRC)[2])
+        NUMFLOORPLANS = int(doc.xpath(NUM_FLOORPLANS_XPATH)[0])
+        
+        fp_urls = []
 
+        FLOORPLAN_IMAGE_XPATH = "//html/body/div[2]/div/div[2]/div[2]/div/div/div/div[2]/div/img/@src"
+
+        if NUMFLOORPLANS > 0:
+            for fpi in range(NUMFLOORPLANS):
+                d = lxml.html.fromstring(requests.get("https://www.rightmove.co.uk/properties/" + str(rm_property_id) + "#/floorplan?activePlan=1"))  
+                fp_src = str(d.xpath(FLOORPLAN_IMAGE_XPATH)[0])
+                fp_urls.append(fp_src)
+
+        return Property(headline=DISPLAYADDRESS, lonlat=(LONGITUDE, LATITUDE), descr=PROPERTYDESCRIPTION, rent=PRICEAMOUNT, rooms=(BEDROOMS, BATHROOMS), fp_url=fp_urls, gallery=)
+        
     def gen_property_urls(self, rmids):
         """
         Returns a generator function which provides an output sequence of property rental URLs.

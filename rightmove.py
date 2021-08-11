@@ -37,7 +37,7 @@ class RightmoveHelper:
             iterator += 1
 
         res = requests.get(REQ_URL)
-        print("Requesting the following endpoint:", REQ_URL)
+#        print("Requesting the following endpoint:", REQ_URL)
         assert res.status_code == 200, "The request to the Rightmove RMID endpoint was unsuccessful."
 
         data = res.json()
@@ -45,7 +45,7 @@ class RightmoveHelper:
 
         return locations
 
-    def scrape_property(self, rm_property_id):
+    def scrape_property(self, prop_url):
         """
         Scrapes all details of a property page and returns a Property object.
 
@@ -55,56 +55,21 @@ class RightmoveHelper:
         Returns:
         prop (Property):An object of type Property containing the property details.
         """
-        RM_URL = "https://www.rightmove.co.uk/properties/" + str(rm_property_id) + "#/"
-        
-        html = requests.get(RM_URL)
+        html = requests.get(prop_url)
         doc = lxml.html.fromstring(html.content)
 
-        DISPLAYADDRESS_XPATH = "//h1[@itemprop='streetAddress']"
-        PRICE_XPATH = "//html/body/div[2]/div/div[3]/main/div[2]/div/div/div/span"
-        PROPERTYTYPE_XPATH = "//div[@data-test='infoReel']/div[1]/div[2]" 
-        BEDROOMS_XPATH = "//div[@data-test='infoReel']/div[2]/div[2]"
-        BATHROOMS_XPATH = "//div[@data-test='infoReel']/div[3]/div[2]"
-        PROPERTYDESCRIPTION_XPATH = "//html/body/div[2]/div/div[3]/main/div[10]/div/div"
-        MAPIMGSRC_XPATH =  "//html/body/div[2]/div/div[3]/main/div[16]/div/a/img/@src"
-        LATITUDE_REGEX = re.compile(r"(latitude=)(.*)&l")
-        LONGITUDE_REGEX = re.compile(r"(longitude=)(.*)&" )
-        NUM_FLOORPLANS_XPATH= "//html/body/div[2]/div/div[3]/main/div[8]/div[1]/a/span"
+        price = doc.xpath("/html/body/div[@id='root']/div[@class='_38rRoDgM898XoMhNRXSWGq']/div[@class='WJG_W7faYk84nW-6sCBVi']/main[@class='_2cXkMZ35RNYeRkIc77z-4p']/div[@class='_2fFy6nQs_hX4a6WEDR-B-6']/div[@class='_5KANqpn5yboC4UXVUxwjZ']/div[@class='_3Kl5bSUaVKx1bidl6IHGj7']/div[@class='_1gfnqJ3Vtd1z40MlC0MzXu']/span/text()")[0]
+        descr = doc.xpath("/html/body/div[@id='root']/div[@class='_38rRoDgM898XoMhNRXSWGq']/div[@class='WJG_W7faYk84nW-6sCBVi']/main[@class='_2cXkMZ35RNYeRkIc77z-4p']/div[@class='OD0O7FWw1TjbTD4sdRi1_']/div[@class='STw8udCxUaBUMfOOZu0iL _3nPVwR0HZYQah5tkVJHFh5']/div/text()")[0]
+        bedrooms = doc.xpath("/html/body/div[@id='root']/div[@class='_38rRoDgM898XoMhNRXSWGq']/div[@class='WJG_W7faYk84nW-6sCBVi']/main[@class='_2cXkMZ35RNYeRkIc77z-4p']/div[@class='_4hBezflLdgDMdFtURKTWh']/div[@class='_1u12RxIYGx3c84eaGxI6_b'][2]/div[@class='_3mqo4prndvEDFoh4cDJw_n']/div[@class='_2Pr4092dZUG6t1_MyGPRoL']/div[@class='_1fcftXUEbWfJOJzIUeIHKt']/text()")[0]
+        bathrooms = doc.xpath("/html/body/div[@id='root']/div[@class='_38rRoDgM898XoMhNRXSWGq']/div[@class='WJG_W7faYk84nW-6sCBVi']/main[@class='_2cXkMZ35RNYeRkIc77z-4p']/div[@class='_4hBezflLdgDMdFtURKTWh']/div[@class='_1u12RxIYGx3c84eaGxI6_b'][3]/div[@class='_3mqo4prndvEDFoh4cDJw_n']/div[@class='_2Pr4092dZUG6t1_MyGPRoL']/div[@class='_1fcftXUEbWfJOJzIUeIHKt']/text()")[0]
+        let_date = doc.xpath("/html/body/div[@id='root']/div[@class='_38rRoDgM898XoMhNRXSWGq']/div[@class='WJG_W7faYk84nW-6sCBVi']/main[@class='_2cXkMZ35RNYeRkIc77z-4p']/div[@class='_21Dc_JVLfbrsoEkZYykXK5']/dl[@class='_2E1qBJkWUYMJYHfYJzUb_r']/div[@class='_2RnXSVJcWbWv4IpBC1Sng6'][1]/dd/text()")[0]
+        let_type = doc.xpath("/html/body/div[@id='root']/div[@class='_38rRoDgM898XoMhNRXSWGq']/div[@class='WJG_W7faYk84nW-6sCBVi']/main[@class='_2cXkMZ35RNYeRkIc77z-4p']/div[@class='_21Dc_JVLfbrsoEkZYykXK5']/dl[@class='_2E1qBJkWUYMJYHfYJzUb_r']/div[@class='_2RnXSVJcWbWv4IpBC1Sng6'][2]/dd/text()")[0]
+        furnish_type = doc.xpath("/html/body/div[@id='root']/div[@class='_38rRoDgM898XoMhNRXSWGq']/div[@class='WJG_W7faYk84nW-6sCBVi']/main[@class='_2cXkMZ35RNYeRkIc77z-4p']/div[@class='_21Dc_JVLfbrsoEkZYykXK5']/dl[@class='_2E1qBJkWUYMJYHfYJzUb_r']/div[@class='_2RnXSVJcWbWv4IpBC1Sng6'][3]/dd")[0]
 
-        PRICEAMOUNT = str(doc.xpath(PRICE_XPATH)[0])
-        DISPLAYADDRESS = str(doc.xpath(DISPLAYADDRESS_XPATH)[0])
-        PROPERTYTYPE = str(doc.xpath(PROPERTYTYPE_XPATH)[0])
-        BEDROOMS = str(doc.xpath(BEDROOMS_XPATH)[0])
-        PROEPRTYDESCRIPTION = str(doc.xpath(PROPERTYDESCRIPTION_XPATH)[0])
-        BATHROOMS = str(doc.xpath(BATHROOMS_XPATH)[0])
-        MAPIMGSRC = str(doc.xpath(IMGSRC_XPATH)[0])
-        LONGITUDE = int(LONGITUDE_REGEX.match(MAPIMGSRC)[2])
-        LATITUDE = int(LATITUDE_REGEX.match(MAPIMGSRC)[2])
-        NUMFLOORPLANS = int(doc.xpath(NUM_FLOORPLANS_XPATH)[0])
-        
-        fp_urls = []
+        print(RM_URL)
 
-        FLOORPLAN_IMAGE_XPATH = "//html/body/div[2]/div/div[2]/div[2]/div/div/div/div[2]/div/img/@src"
+        pass
 
-        if NUMFLOORPLANS > 0:
-            for fpi in range(NUMFLOORPLANS):
-                d = lxml.html.fromstring(requests.get("https://www.rightmove.co.uk/properties/" + str(rm_property_id) + "#/floorplan?activePlan=1"))  
-                fp_src = str(d.xpath(FLOORPLAN_IMAGE_XPATH)[0])
-                fp_urls.append(fp_src)
-
-        NUM_IMAGES_XPATH = "//html/body/div[2]/div/div[3]/main/div[8]/div[2]/a[7]"
-        NUMIMGS = int(str(doc.xpath(NUM_IMAGES_XPATH)[0]).replace("+",""))
-        
-        img_urls = []
-
-        if NUMIMGS > 0:
-            for nimg in range(NUMIMGS):
-                d = lxml.html.fromstring(requests.get("https://www.rightmove.co.uk/properties/" + str(rm_property_id) + "#/media?id=media" + str(nimg)))
-                IMG_XPATH = "//html/body/div[2]/div/div[2]/div[2]/div/div/div[4]/div/div/img/@src"
-                img_src = str(d.xpath(IMG_XPATH)[0])
-                img_urls.append(img_src)
-
-        return Property(headline=DISPLAYADDRESS, lonlat=(LONGITUDE, LATITUDE), descr=PROPERTYDESCRIPTION, rent=PRICEAMOUNT, rooms=(BEDROOMS, BATHROOMS), fp_url=fp_urls, gallery=img_urls)
     def gen_property_urls(self, rmids):
         """
         Returns a generator function which provides an output sequence of property rental URLs.
@@ -115,7 +80,7 @@ class RightmoveHelper:
         Returns:
         links (list):The generated array containing the rental URLs.
         """
-        BASE_URL = "https://www.rightmove.co.uk/property-to-rent/find.html?searchType=RENT&locationIdentifier="
+        BASE_URL = "https://www.rightmove.co.uk/property/"
         for rmid in rmids:
             yield BASE_URL + str(rmid)
 
@@ -139,7 +104,7 @@ class RightmoveHelper:
 
         NUM_SCRAPED = 0
         TOTAL_RESULTS = int(doc.xpath("//div[@id='searchHeader']/span/text()")[0].replace(",", ""))
-        print(TOTAL_RESULTS, "properties to scrape...")
+#        print(TOTAL_RESULTS, "properties to scrape...")
 
         prev_idcol_count = 1    # The number of IDs collected in the previous iteration.
 
@@ -154,7 +119,7 @@ class RightmoveHelper:
             
             RM_PROPIDS += ids
 
-            print(NUM_SCRAPED)
+ #           print(NUM_SCRAPED)
             NUM_SCRAPED += len(ids) - 1
             SEARCH_URL = base_search_url + "&index=" + str(NUM_SCRAPED)
         
